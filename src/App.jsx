@@ -4,21 +4,19 @@ import { Route, Routes } from "react-router-dom";
 import {
   ListTodo,
   Plus,
-  Trash2,
   CheckCircle2,
   Circle,
   Search,
-  Pencil,
   X,
 } from "lucide-react";
 
 import Sidebar from "./components/Sidebar.jsx";
+import TaskCard from "./components/TaskCard.jsx";
 
-// Chave utilizada para salvar tarefas no navegador
+// Dados iniciais
 const STORAGE_KEY = "taskflow-tasks-v1";
 
-// Tarefas iniciais
-const seeds = [
+const initialTasks = [
   {
     id: "1",
     title: "Planejar a semana",
@@ -45,76 +43,30 @@ const seeds = [
   },
 ];
 
-// Busca tarefas salvas no LocalStorage
+// Carrega tarefas salvas
 function readTasks() {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : seeds;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : initialTasks;
   } catch {
-    return seeds;
+    return initialTasks;
   }
 }
 
-// Componente de estatísticas
+// Card de estatísticas
 function StatCard({ label, value, icon, tone }) {
   return (
     <article className="stat-card">
-      <div className={`stat-icon ${tone}`}>{icon}</div>
+      <div className={`stat-icon ${tone}`}>
+        {icon}
+      </div>
       <span>{label}</span>
       <strong>{value}</strong>
     </article>
   );
 }
 
-// Componente de tarefa
-function TaskCard({ task, onToggle, onEdit, onDelete }) {
-  return (
-    <article className={`task-card ${task.done ? "completed" : ""}`}>
-      <button
-        className="check-button"
-        onClick={() => onToggle(task.id)}
-        aria-label={task.done ? "Marcar pendente" : "Concluir tarefa"}
-      >
-        {task.done ? (
-          <CheckCircle2 size={23} />
-        ) : (
-          <Circle size={23} />
-        )}
-      </button>
-
-      <div className="task-content">
-        <h3>{task.title}</h3>
-        <p>{task.description || "Sem descrição"}</p>
-
-        <div className="task-meta">
-          <span className={`priority ${task.priority.toLowerCase()}`}>
-            {task.priority}
-          </span>
-
-          <span className="category">{task.category}</span>
-        </div>
-      </div>
-
-      <div className="task-actions">
-        <button
-          onClick={() => onEdit(task)}
-          title="Editar tarefa"
-        >
-          <Pencil size={17} />
-        </button>
-
-        <button
-          onClick={() => onDelete(task.id)}
-          title="Excluir tarefa"
-        >
-          <Trash2 size={17} />
-        </button>
-      </div>
-    </article>
-  );
-}
-
-// Formulário de criação e edição
+// Formulário de tarefas
 function TaskForm({ initial, onSave, onClose }) {
   const [form, setForm] = useState(
     initial || {
@@ -125,12 +77,12 @@ function TaskForm({ initial, onSave, onClose }) {
     }
   );
 
-  const update = (field, value) => {
+  function update(field, value) {
     setForm((previous) => ({
       ...previous,
       [field]: value,
     }));
-  };
+  }
 
   function submit(event) {
     event.preventDefault();
@@ -218,7 +170,7 @@ function TaskForm({ initial, onSave, onClose }) {
             </label>
           </div>
 
-          <button type="submit" className="primary full">
+          <button className="primary full" type="submit">
             {initial ? "Salvar alterações" : "Criar tarefa"}
           </button>
         </form>
@@ -227,7 +179,7 @@ function TaskForm({ initial, onSave, onClose }) {
   );
 }
 
-// Página Dashboard
+// Dashboard
 function Dashboard({
   tasks,
   onToggle,
@@ -247,11 +199,9 @@ function Dashboard({
       <div className="page-heading">
         <div>
           <div className="eyebrow">VISÃO GERAL</div>
-
           <h1>
             Seu painel de produtividade <span>✦</span>
           </h1>
-
           <p>
             Acompanhe seu progresso e mantenha o foco no que importa.
           </p>
@@ -289,9 +239,7 @@ function Dashboard({
       <section className="progress-panel">
         <div>
           <span className="eyebrow">SEU PROGRESSO</span>
-
           <h2>Continue nesse ritmo! 🚀</h2>
-
           <p>
             Você concluiu {completed} de {tasks.length} tarefas.
           </p>
@@ -350,7 +298,7 @@ function TasksPage({
         (filter === "Concluídas" ? task.done : !task.done);
 
       const matchesSearch =
-        `${task.title} ${task.description}`
+        `${task.title} ${task.description || ""}`
           .toLowerCase()
           .includes(query.toLowerCase());
 
@@ -434,7 +382,6 @@ function UsersPage() {
         if (!response.ok) {
           throw new Error("Falha ao buscar usuários");
         }
-
         return response.json();
       })
       .then((data) => {
@@ -467,7 +414,6 @@ function UsersPage() {
       {status === "error" && (
         <div className="empty">
           Não foi possível carregar os usuários.
-
           <button
             className="primary"
             onClick={() => setReload((n) => n + 1)}
@@ -505,19 +451,19 @@ function UsersPage() {
   );
 }
 
-// Componente principal
+// Aplicação principal
 export default function App() {
   const [tasks, setTasks] = useState(readTasks);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  // Salva as tarefas sempre que forem alteradas
+  // Salva tarefas no navegador
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
 
   // Concluir ou reabrir tarefa
-  const toggle = (id) => {
+  function toggle(id) {
     setTasks((current) =>
       current.map((task) =>
         task.id === id
@@ -525,31 +471,31 @@ export default function App() {
           : task
       )
     );
-  };
+  }
 
   // Excluir tarefa
-  const remove = (id) => {
+  function remove(id) {
     if (window.confirm("Deseja excluir esta tarefa?")) {
       setTasks((current) =>
         current.filter((task) => task.id !== id)
       );
     }
-  };
+  }
 
   // Editar tarefa
-  const edit = (task) => {
+  function edit(task) {
     setEditing(task);
     setShowForm(true);
-  };
+  }
 
-  // Abrir formulário de nova tarefa
-  const openNew = () => {
+  // Abrir nova tarefa
+  function openNew() {
     setEditing(null);
     setShowForm(true);
-  };
+  }
 
   // Salvar tarefa
-  const save = (form) => {
+  function save(form) {
     if (editing) {
       setTasks((current) =>
         current.map((task) =>
@@ -571,7 +517,7 @@ export default function App() {
 
     setShowForm(false);
     setEditing(null);
-  };
+  }
 
   const common = {
     tasks,
