@@ -1,7 +1,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useParams } from "react-router-dom";
 import {
+  ArrowLeft,
   ListTodo,
   Plus,
   CheckCircle2,
@@ -337,14 +338,96 @@ function UsersPage() {
   );
 }
 
+function TaskDetailPage({ tasks, onToggle, onEdit }) {
+  const { id } = useParams();
+  const task = tasks.find((item) => item.id === id);
+
+  if (!task) {
+    return (
+      <div className="empty">
+        Tarefa não encontrada para o identificador informado.
+        <Link to="/tarefas" className="primary">
+          Voltar para tarefas
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="page-heading">
+        <div>
+          <div className="eyebrow">DETALHES DA TAREFA (USEPARAMS)</div>
+          <h1>{task.title}</h1>
+          <p>{task.description || "Nenhuma descrição cadastrada para esta tarefa."}</p>
+        </div>
+
+        <Link to="/tarefas" className="primary">
+          <ArrowLeft size={18} />
+          Voltar à lista
+        </Link>
+      </div>
+
+      <article className="task-card">
+        <div className="task-content">
+          <p>
+            <strong>ID na rota:</strong> {task.id}
+          </p>
+          <div className="task-meta">
+            <span className={`priority ${task.priority.toLowerCase()}`}>
+              Prioridade: {task.priority}
+            </span>
+            <span className="category">Categoria: {task.category}</span>
+            <span className="category">
+              Status: {task.done ? "Concluída" : "Pendente"}
+            </span>
+          </div>
+        </div>
+
+        <div className="task-actions">
+          <button
+            type="button"
+            onClick={() => onToggle(task.id)}
+            title={task.done ? "Reabrir tarefa" : "Concluir tarefa"}
+          >
+            {task.done ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+          </button>
+          <button
+            type="button"
+            onClick={() => onEdit(task)}
+            title="Editar tarefa"
+          >
+            Editar
+          </button>
+        </div>
+      </article>
+    </>
+  );
+}
+
 export default function App() {
   const [tasks, setTasks] = useState(readTasks);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
+
+  useEffect(() => {
+    const pageTitles = {
+      "/": "TaskFlow — Dashboard",
+      "/tarefas": "TaskFlow — Minhas Tarefas",
+      "/usuarios": "TaskFlow — Usuários da API",
+    };
+
+    document.title =
+      pageTitles[location.pathname] ||
+      (location.pathname.startsWith("/tarefas/")
+        ? "TaskFlow — Detalhes da Tarefa"
+        : "TaskFlow — Projeto React");
+  }, [location.pathname]);
 
   function toggle(id) {
     setTasks((current) =>
@@ -433,6 +516,17 @@ export default function App() {
             <Route
               path="/tarefas"
               element={<TasksPage {...common} />}
+            />
+
+            <Route
+              path="/tarefas/:id"
+              element={
+                <TaskDetailPage
+                  tasks={tasks}
+                  onToggle={toggle}
+                  onEdit={edit}
+                />
+              }
             />
 
             <Route

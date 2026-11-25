@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   CheckCircle2,
   Circle,
@@ -28,7 +29,9 @@ export default function TaskCard({
       </button>
 
       <div className="task-content">
-        <h3>{task.title}</h3>
+        <h3>
+          <Link to={`/tarefas/${task.id}`}>{task.title}</Link>
+        </h3>
         <p>{task.description || "Sem descrição"}</p>
 
         <div className="task-meta">
