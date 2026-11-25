@@ -7,13 +7,12 @@ import {
   CheckCircle2,
   Circle,
   Search,
-  X,
 } from "lucide-react";
 
 import Sidebar from "./components/Sidebar.jsx";
 import TaskCard from "./components/TaskCard.jsx";
+import TaskForm from "./components/TaskForm.jsx";
 
-// Dados iniciais
 const STORAGE_KEY = "taskflow-tasks-v1";
 
 const initialTasks = [
@@ -43,7 +42,6 @@ const initialTasks = [
   },
 ];
 
-// Carrega tarefas salvas
 function readTasks() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -53,7 +51,6 @@ function readTasks() {
   }
 }
 
-// Card de estatísticas
 function StatCard({ label, value, icon, tone }) {
   return (
     <article className="stat-card">
@@ -66,120 +63,6 @@ function StatCard({ label, value, icon, tone }) {
   );
 }
 
-// Formulário de tarefas
-function TaskForm({ initial, onSave, onClose }) {
-  const [form, setForm] = useState(
-    initial || {
-      title: "",
-      description: "",
-      priority: "Média",
-      category: "Pessoal",
-    }
-  );
-
-  function update(field, value) {
-    setForm((previous) => ({
-      ...previous,
-      [field]: value,
-    }));
-  }
-
-  function submit(event) {
-    event.preventDefault();
-
-    if (!form.title.trim()) return;
-
-    onSave({
-      ...form,
-      title: form.title.trim(),
-      description: form.description.trim(),
-    });
-  }
-
-  return (
-    <div className="modal-backdrop" onMouseDown={onClose}>
-      <div
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Formulário de tarefa"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <div className="modal-heading">
-          <h2>{initial ? "Editar tarefa" : "Nova tarefa"}</h2>
-
-          <button onClick={onClose} aria-label="Fechar">
-            <X size={21} />
-          </button>
-        </div>
-
-        <form onSubmit={submit}>
-          <label>
-            Título da tarefa
-            <input
-              autoFocus
-              maxLength={90}
-              required
-              value={form.title}
-              onChange={(event) =>
-                update("title", event.target.value)
-              }
-              placeholder="Ex.: Finalizar projeto React"
-            />
-          </label>
-
-          <label>
-            Descrição
-            <textarea
-              rows={3}
-              value={form.description}
-              onChange={(event) =>
-                update("description", event.target.value)
-              }
-              placeholder="Adicione detalhes..."
-            />
-          </label>
-
-          <div className="form-row">
-            <label>
-              Prioridade
-              <select
-                value={form.priority}
-                onChange={(event) =>
-                  update("priority", event.target.value)
-                }
-              >
-                <option>Baixa</option>
-                <option>Média</option>
-                <option>Alta</option>
-              </select>
-            </label>
-
-            <label>
-              Categoria
-              <select
-                value={form.category}
-                onChange={(event) =>
-                  update("category", event.target.value)
-                }
-              >
-                <option>Pessoal</option>
-                <option>Estudos</option>
-                <option>Trabalho</option>
-              </select>
-            </label>
-          </div>
-
-          <button className="primary full" type="submit">
-            {initial ? "Salvar alterações" : "Criar tarefa"}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// Dashboard
 function Dashboard({
   tasks,
   onToggle,
@@ -199,9 +82,11 @@ function Dashboard({
       <div className="page-heading">
         <div>
           <div className="eyebrow">VISÃO GERAL</div>
+
           <h1>
             Seu painel de produtividade <span>✦</span>
           </h1>
+
           <p>
             Acompanhe seu progresso e mantenha o foco no que importa.
           </p>
@@ -239,7 +124,9 @@ function Dashboard({
       <section className="progress-panel">
         <div>
           <span className="eyebrow">SEU PROGRESSO</span>
+
           <h2>Continue nesse ritmo! 🚀</h2>
+
           <p>
             Você concluiu {completed} de {tasks.length} tarefas.
           </p>
@@ -280,7 +167,6 @@ function Dashboard({
   );
 }
 
-// Página de tarefas
 function TasksPage({
   tasks,
   onToggle,
@@ -364,7 +250,6 @@ function TasksPage({
   );
 }
 
-// Página de usuários da API
 function UsersPage() {
   const [users, setUsers] = useState([]);
   const [status, setStatus] = useState("loading");
@@ -414,6 +299,7 @@ function UsersPage() {
       {status === "error" && (
         <div className="empty">
           Não foi possível carregar os usuários.
+
           <button
             className="primary"
             onClick={() => setReload((n) => n + 1)}
@@ -451,18 +337,15 @@ function UsersPage() {
   );
 }
 
-// Aplicação principal
 export default function App() {
   const [tasks, setTasks] = useState(readTasks);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  // Salva tarefas no navegador
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
 
-  // Concluir ou reabrir tarefa
   function toggle(id) {
     setTasks((current) =>
       current.map((task) =>
@@ -473,7 +356,6 @@ export default function App() {
     );
   }
 
-  // Excluir tarefa
   function remove(id) {
     if (window.confirm("Deseja excluir esta tarefa?")) {
       setTasks((current) =>
@@ -482,19 +364,16 @@ export default function App() {
     }
   }
 
-  // Editar tarefa
   function edit(task) {
     setEditing(task);
     setShowForm(true);
   }
 
-  // Abrir nova tarefa
   function openNew() {
     setEditing(null);
     setShowForm(true);
   }
 
-  // Salvar tarefa
   function save(form) {
     if (editing) {
       setTasks((current) =>
