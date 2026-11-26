@@ -2,6 +2,9 @@
 
 Gerenciador de tarefas responsivo construído com **React 19, Vite 7 e React Router 7**, aplicando na prática os fundamentos estudados na **Aula 08 (Projeto React)** — além de integração completa com estado, formulários, efeitos, API e rotas — na disciplina de **Frameworks Front-end** (SENAI).
 
+- **Deploy em Produção (Vercel):** [🌐 Ver online](https://react-taskflow-tau.vercel.app)
+- **Repositório GitHub:** [🔗 Repositório](https://github.com/Enzootomas/react-taskflow)
+
 ---
 
 ## 📸 Captura de Tela da Aplicação em Funcionamento
